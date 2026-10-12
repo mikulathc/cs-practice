@@ -10,7 +10,11 @@ def multiply(a, b):
 # Пример работы функций
 # Намеренная ошибка для демонстрации revert
 result = 10 / 0
-if __name__ == "__main__":
+
+def safe_divide(a, b):
+    if b == 0:
+        return "Ошибка: деление на ноль!"
+    return a / bif __name__ == "__main__":
     x = 10
     y = 5
     print(f"Сложение: {x} + {y} = {add(x, y)}")
