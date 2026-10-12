@@ -8,6 +8,8 @@ def multiply(a, b):
     return a * b
 
 # Пример работы функций
+# Намеренная ошибка для демонстрации revert
+result = 10 / 0
 if __name__ == "__main__":
     x = 10
     y = 5
