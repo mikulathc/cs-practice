@@ -116,3 +116,4 @@ def format_report(counts: dict, errors: list[list]) -> str:
     
     return "\n".join(report_lines) + "\n"
 
+
