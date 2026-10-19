@@ -30,4 +30,28 @@ def read_valid(records: list):
             continue
     return result
 
+def average_by_city(records: list):
+    sums = {}
+    counts = {}
+    
+    for rec in records:
+        city = rec["city"]
+        temp = rec["temperature"]
+        
+        sums[city] = sums.get(city, 0) + temp
+        counts[city] = counts.get(city, 0) + 1
+    
+    return {city: sums[city] / counts[city] for city in sums}
+
+def warmest_city(records: list):
+    if not records:
+        return None
+    
+    averages = average_by_city(records)
+    if not averages:
+        return None
+    
+    return max(averages.items(), key=lambda x: x)
+
+
 
