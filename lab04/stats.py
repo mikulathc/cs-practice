@@ -11,7 +11,7 @@ def parse_record(record: str):
     temp_str = parts[1].strip().replace(',', '.')
     date_str = parts[2].strip()
     
-    # Город не может быть пустым (защита от ";24.5;...")
+    # Город не может быть пустым
     if not city:
         raise ValueError("City cannot be empty")
     
@@ -33,7 +33,7 @@ def read_valid(records: list):
         try:
             result.append(parse_record(r))
         except Exception:
-            # Любые ошибки (неверный формат, пустая строка и т.п.) — просто пропускаем
+            # Пропускаем любые строки, которые не удалось распарсить
             continue
     return result
 
@@ -42,6 +42,10 @@ def average_by_city(records: list):
     counts = {}
     
     for rec in records:
+        # ЗАЩИТА: если в словаре нет правильного ключа "temperature", пропускаем эту запись
+        if "temperature" not in rec:
+            continue
+            
         city = rec["city"]
         temp = rec["temperature"]
         
