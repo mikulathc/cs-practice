@@ -3,7 +3,7 @@ from datetime import datetime
 def parse_record(record: str):
     parts = record.split(';')
     
-    # Должно быть ровно 3 части
+    # Строго 3 части
     if len(parts) != 3:
         raise ValueError("Invalid format")
     
@@ -11,7 +11,7 @@ def parse_record(record: str):
     temp_str = parts[1].strip().replace(',', '.')
     date_str = parts[2].strip()
     
-    # Город не может быть пустым
+    # Защита: город не может быть пустым
     if not city:
         raise ValueError("City cannot be empty")
     
@@ -33,7 +33,7 @@ def read_valid(records: list):
         try:
             result.append(parse_record(r))
         except Exception:
-            # Пропускаем любые строки, которые не удалось распарсить
+            # Пропускаем всё, что не удалось распарсить
             continue
     return result
 
@@ -42,7 +42,7 @@ def average_by_city(records: list):
     counts = {}
     
     for rec in records:
-        # ЗАЩИТА: если в словаре нет правильного ключа "temperature", пропускаем эту запись
+        # ГЛАВНОЕ: если нет правильного ключа "temperature" — пропускаем запись
         if "temperature" not in rec:
             continue
             
@@ -52,15 +52,14 @@ def average_by_city(records: list):
         sums[city] = sums.get(city, 0) + temp
         counts[city] = counts.get(city, 0) + 1
     
+    if not sums:
+        return {}
+        
     return {city: sums[city] / counts[city] for city in sums}
 
 def warmest_city(records: list):
     if not records:
         return None
     
-    averages = average_by_city(records)
-    if not averages:
-        return None
-    
-    # x[1] — температура, [0] — название города
-    return max(averages.items(), key=lambda x: x[1])[0]
+    averages
+
