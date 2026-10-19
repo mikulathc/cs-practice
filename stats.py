@@ -5,9 +5,9 @@ def parse_record(record: str):
     if len(parts) != 3:
         raise ValueError("Invalid format")
     
-    city = parts.strip()
-    temp_str = parts.strip().replace(',', '.')
-    date_str = parts.strip()
+    city = parts[0].strip()
+    temp_str = parts[1].strip().replace(',', '.')
+    date_str = parts[2].strip()
     
     try:
         temperature = float(temp_str)
@@ -22,7 +22,7 @@ def parse_record(record: str):
     return {"city": city, "temperature": temperature, "date": date_str}
 
 def read_valid(records: list):
-    result = 
+    result = []
     for r in records:
         try:
             result.append(parse_record(r))
@@ -51,7 +51,5 @@ def warmest_city(records: list):
     if not averages:
         return None
     
-    return max(averages.items(), key=lambda x: x)
-
-
-
+    # x[1] — это температура; [0] — возвращаем только название города
+    return max(averages.items(), key=lambda x: x[1])[0]
