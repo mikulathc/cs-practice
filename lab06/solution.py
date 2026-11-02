@@ -2,12 +2,23 @@ def count_by_extension(paths):
     result = {}
     for path in paths:
         name = path.split("/")[-1]
-        if "." in name:
-            ext = name.rsplit(".", 1)[1].lower()
-        else:
+
+        last_dot = name.rfind(".")
+
+        if last_dot == -1:
+            # Точки вообще нет
             ext = ""
+        elif last_dot == 0:
+            # Файл начинается с точки и других точек нет (.gitignore)
+            ext = ""
+        else:
+            # Есть точка не в начале — берём часть после последней точки
+            ext = name[last_dot + 1:].lower()
+
         result[ext] = result.get(ext, 0) + 1
+
     return result
+
 
 
 def deepest_path(paths):
