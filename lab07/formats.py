@@ -27,15 +27,17 @@ def _to_typed_value(value_str: str):
     s = value_str.strip()
     lower = s.lower()
 
+    # Булевы значения
     if lower in ("true", "yes"):
         return True
     if lower in ("false", "no"):
         return False
 
-    # Если есть запятая — это не число в стиле Python, оставляем строкой
+    # Если есть запятая — точно не число в стиле Python, оставляем строкой
     if "," in s:
         return s
 
+    # Пробуем число (только с точкой)
     try:
         if "." in s:
             return float(s)
@@ -54,6 +56,7 @@ def parse_settings(lines: list[str]) -> dict:
     while i < n:
         line = lines[i]
 
+        # Убираем комментарий
         if "#" in line:
             line = line[:line.index("#")]
 
@@ -89,6 +92,7 @@ def parse_settings(lines: list[str]) -> dict:
             if value_str:
                 result[key] = _to_typed_value(value_str)
             else:
+                # ключ: без значения — трактуем как пустую строку
                 result[key] = ""
             i += 1
             continue
@@ -107,16 +111,5 @@ def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
             info = extra[lookup_value]
             for k, v in info.items():
                 if k not in new_row:
-                    new_row[k] = v
-        merged.append(new_row)
-    return merged
-
-
-def records_to_json(records: list[dict]) -> str:
-    return json.dumps(
-        records,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True
-    )
+                    new_row[k]
 
