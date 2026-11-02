@@ -2,10 +2,6 @@ import json
 
 
 def csv_to_records(text: str) -> list[dict]:
-    """
-    CSV с заголовком → список словарей. Значения остаются строками.
-    Пробелы вокруг полей убираются.
-    """
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if not lines:
         return []
@@ -27,7 +23,6 @@ def _to_typed_value(value_str: str):
     s = value_str.strip()
     lower = s.lower()
 
-    # Булевы значения
     if lower in ("true", "yes"):
         return True
     if lower in ("false", "no"):
@@ -37,7 +32,6 @@ def _to_typed_value(value_str: str):
     if "," in s:
         return s
 
-    # Пробуем число (только с точкой)
     try:
         if "." in s:
             return float(s)
@@ -56,7 +50,6 @@ def parse_settings(lines: list[str]) -> dict:
     while i < n:
         line = lines[i]
 
-        # Убираем комментарий
         if "#" in line:
             line = line[:line.index("#")]
 
@@ -92,7 +85,6 @@ def parse_settings(lines: list[str]) -> dict:
             if value_str:
                 result[key] = _to_typed_value(value_str)
             else:
-                # ключ: без значения — трактуем как пустую строку
                 result[key] = ""
             i += 1
             continue
@@ -105,11 +97,33 @@ def parse_settings(lines: list[str]) -> dict:
 def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
     merged = []
     for row in rows:
-        new_row = dict(row)
+        new_row = dict(row)  # копия, чтобы не менять оригинал
         lookup_value = row.get(key)
-        if lookup_value is not None and lookup_value in extra:
-            info = extra[lookup_value]
-            for k, v in info.items():
-                if k not in new_row:
-                    new_row[k]
+
+        # Защита: если lookup_value None или нет в extra — ничего не делаем
+        if lookup_value is None or lookup_value not in extra:
+            merged.append(new_row)
+            continue
+
+        info = extra[lookup_value]
+        # info может быть не dict (на всякий случай)
+        if not isinstance(info, dict):
+            merged.append(new_row)
+            continue
+
+        for k, v in info.items():
+            # Добавляем только если такого ключа ещё нет в записи
+            if k not in new_row:
+                new_row[k] = v
+        merged.append(new_row)
+    return merged
+
+
+def records_to_json(records: list[dict]) -> str:
+    return json.dumps(
+        records,
+        ensure_ascii=False,
+        indent=2,
+        sort_keys=True
+    )
 
