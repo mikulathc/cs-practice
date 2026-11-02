@@ -28,7 +28,7 @@ def _to_typed_value(value_str: str):
     if lower in ("false", "no"):
         return False
 
-    # ГЛАВНОЕ: если есть запятая — сразу возвращаем строку, не пытаемся парсить
+    # ГЛАВНОЕ: если есть запятая — сразу возвращаем строку
     if "," in s:
         return s
 
@@ -58,7 +58,6 @@ def parse_settings(lines: list[str]) -> dict:
             i += 1
             continue
 
-        # Обработка списков: ключ:
         if ":" in line and line.rstrip().endswith(":"):
             key = line.rstrip()[:-1].strip()
             items = []
@@ -77,7 +76,6 @@ def parse_settings(lines: list[str]) -> dict:
             result[key] = items
             continue
 
-        # Обычная пара ключ: значение
         if ":" in line:
             key, _, value_raw = line.partition(":")
             key = key.strip()
