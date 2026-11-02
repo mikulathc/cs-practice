@@ -28,7 +28,7 @@ def _to_typed_value(value_str: str):
     if lower in ("false", "no"):
         return False
 
-    # Если есть запятая — точно не число в стиле Python, оставляем строкой
+    # ГЛАВНОЕ: если есть запятая — сразу возвращаем строку, не пытаемся парсить
     if "," in s:
         return s
 
@@ -58,7 +58,7 @@ def parse_settings(lines: list[str]) -> dict:
             i += 1
             continue
 
-        # Ключ: без значения → открывает список
+        # Обработка списков: ключ:
         if ":" in line and line.rstrip().endswith(":"):
             key = line.rstrip()[:-1].strip()
             items = []
@@ -97,22 +97,19 @@ def parse_settings(lines: list[str]) -> dict:
 def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
     merged = []
     for row in rows:
-        new_row = dict(row)  # копия, чтобы не менять оригинал
+        new_row = dict(row)
         lookup_value = row.get(key)
 
-        # Защита: если lookup_value None или нет в extra — ничего не делаем
         if lookup_value is None or lookup_value not in extra:
             merged.append(new_row)
             continue
 
         info = extra[lookup_value]
-        # info может быть не dict (на всякий случай)
         if not isinstance(info, dict):
             merged.append(new_row)
             continue
 
         for k, v in info.items():
-            # Добавляем только если такого ключа ещё нет в записи
             if k not in new_row:
                 new_row[k] = v
         merged.append(new_row)
@@ -126,5 +123,4 @@ def records_to_json(records: list[dict]) -> str:
         indent=2,
         sort_keys=True
     )
-
 
