@@ -121,4 +121,3 @@ def records_to_json(records: list[dict]) -> str:
         indent=2,
         sort_keys=True
     )
-
