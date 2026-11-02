@@ -30,3 +30,18 @@ def deepest_path(paths):
 
     return best_path
 
+def human_size(n_bytes):
+    units = ["Б", "КБ", "МБ", "ГБ", "ТБ"]
+    size = n_bytes
+    unit_index = 0
+
+    while size >= 1024 and unit_index < len(units) - 1:
+        size /= 1024
+        unit_index += 1
+
+    unit = units[unit_index]
+    if unit == "Б":
+        return f"{int(size)} {unit}"
+    else:
+        return f"{size:.1f} {unit}"
+
