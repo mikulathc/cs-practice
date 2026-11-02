@@ -4,17 +4,17 @@ import json
 def csv_to_records(text: str) -> list[dict]:
     """
     CSV с заголовком → список словарей. Значения остаются строками.
-    Разделитель — запятая, кавычек и запятых внутри значений нет.
+    Пробелы вокруг полей убираются.
     """
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if not lines:
         return []
 
-    headers = lines[0].split(",")
+    headers = [h.strip() for h in lines[0].split(",")]
     records = []
 
     for line in lines[1:]:
-        values = line.split(",")
+        values = [v.strip() for v in line.split(",")]
         record = {}
         for i, header in enumerate(headers):
             record[header] = values[i] if i < len(values) else ""
@@ -24,13 +24,6 @@ def csv_to_records(text: str) -> list[dict]:
 
 
 def _to_typed_value(value_str: str):
-    """
-    Преобразует строку в подходящий тип для YAML:
-    - true/yes → True
-    - false/no → False
-    - числа (int/float)
-    - остальное → строка
-    """
     s = value_str.strip()
     lower = s.lower()
 
@@ -38,6 +31,10 @@ def _to_typed_value(value_str: str):
         return True
     if lower in ("false", "no"):
         return False
+
+    # Если есть запятая — это не число в стиле Python, оставляем строкой
+    if "," in s:
+        return s
 
     try:
         if "." in s:
@@ -50,15 +47,6 @@ def _to_typed_value(value_str: str):
 
 
 def parse_settings(lines: list[str]) -> dict:
-    """
-    Простой YAML → словарь.
-    Поддерживает:
-      - ключ: значение
-      - ключ: (открывает список), далее строки "- значение"
-      - комментарии после #
-      - приведение типов (числа, true/false/yes/no)
-    Вложенность не поддерживается.
-    """
     result = {}
     i = 0
     n = len(lines)
@@ -66,7 +54,6 @@ def parse_settings(lines: list[str]) -> dict:
     while i < n:
         line = lines[i]
 
-        # Убираем комментарий
         if "#" in line:
             line = line[:line.index("#")]
 
@@ -75,7 +62,7 @@ def parse_settings(lines: list[str]) -> dict:
             i += 1
             continue
 
-        # Случай: ключ: (без значения) → открывает список
+        # Ключ: без значения → открывает список
         if ":" in line and line.rstrip().endswith(":"):
             key = line.rstrip()[:-1].strip()
             items = []
@@ -92,7 +79,7 @@ def parse_settings(lines: list[str]) -> dict:
                 else:
                     break
             result[key] = items
-            continue  # не увеличиваем i ещё раз
+            continue
 
         # Обычная пара ключ: значение
         if ":" in line:
@@ -112,11 +99,6 @@ def parse_settings(lines: list[str]) -> dict:
 
 
 def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
-    """
-    Дополняет записи сведениями из словаря по значению ключа key.
-    Поля самой записи важнее: если ключ встречается и там, и там, остаётся значение из записи.
-    Записи без пары в справочнике остаются как есть.
-    """
     merged = []
     for row in rows:
         new_row = dict(row)
@@ -131,11 +113,10 @@ def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
 
 
 def records_to_json(records: list[dict]) -> str:
-    """
-    Список словарей → JSON:
-      - ключи по алфавиту
-      - отступ 2 пробела
-      - кириллица как есть (без экранирования)
-    """
-    return
+    return json.dumps(
+        records,
+        ensure_ascii=False,
+        indent=2,
+        sort_keys=True
+    )
 
